@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Sockets;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<RestreamService>();
@@ -20,25 +21,32 @@ app.MapGet("/", (HttpResponse response) =>
     return "go <a href='/stream'>stream</a>";
 });
 
-app.MapGet("/set", () =>
+//app.MapGet("/set", () =>
+//{
+//    using (var scope = app.Services.CreateScope())
+//    {
+//        var service = scope.ServiceProvider.GetRequiredService<RestreamService>();
+//        // ...
+//    }
+//});
+
+app.Map("/stream", async (HttpContext context, HttpResponse response) =>
 {
+    response.ContentType = "audio/aac";
+
+    //response.Headers.Connection = "close";
+    response.Headers.CacheControl = "no-cache";
+
     using (var scope = app.Services.CreateScope())
     {
         var service = scope.ServiceProvider.GetRequiredService<RestreamService>();
-        // ...
-    }
-});
 
-app.Map("/stream", (HttpRequest request, HttpResponse response) =>
-{
-    response.ContentType = new MediaTypeHeaderValue("application/octet-stream").ToString();
-    //response.ContentType = "audio/ogg";
-
-    using (var scope = app.Services.CreateScope())
-    {
-        var service = scope.ServiceProvider.GetRequiredService<RestreamService>();
-        //response.Body = service.Stream;
-        return Results.Stream(service.Stream, "audio/ogg");
+        service.RegisterStream(response.Body);              
+        while (!context.RequestAborted.IsCancellationRequested) 
+        {
+            //for(int i = 0; i < 64; i++) { await response.Body.WriteAsync(Encoding.UTF8.GetBytes("A")); await Task.Delay(100); }
+        }
+        service.UnregisterStream(response.Body);
     }
 });
 

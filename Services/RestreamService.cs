@@ -6,10 +6,9 @@ namespace M3U8LocalStream.Services
     public class RestreamService
     {
         private readonly Process _ffmpegProcess;
-        private readonly MemoryStream _stream;
         private readonly ILogger<RestreamService> _logger;
 
-        public MemoryStream Stream => _stream;
+        private readonly List<Stream> _streams = new List<Stream>();
 
 
         public RestreamService(ILogger<RestreamService> logger)
@@ -27,7 +26,6 @@ namespace M3U8LocalStream.Services
             _logger.LogInformation("FFMPEG started");
 
             // Udp stream (in)
-            _stream = new MemoryStream();
             Task.Run(UdpStreamListener);
         }
 
@@ -37,14 +35,35 @@ namespace M3U8LocalStream.Services
             {
                 while (true)
                 {
-                    var resultChunk = await udp.ReceiveAsync();
-                    await _stream.WriteAsync(resultChunk.Buffer);
-                    //await _stream.FlushAsync();
-                    //_stream.Seek(0, SeekOrigin.Begin);
-                    _logger.LogDebug($"UDP IN | Read {resultChunk.Buffer.Length} bytes ({_stream.Position})");
+                    try
+                    {
+                        var resultChunk = (await udp.ReceiveAsync()).Buffer;
+
+                        for (int i = 0; i < _streams.Count; i++)
+                        {
+                            //await _streams[i].WriteAsync(resultChunk);
+                            //await _streams[i].FlushAsync();
+                        }
+
+                        _logger.LogDebug($"Read {resultChunk.Length} bytes and Write to {_streams.Count} streams");
+                    }
+                    catch(Exception e)
+                    {
+                        _logger.LogError(e.ToString());
+                    }
+                    //await Task.Delay(100);
                 }
             }
         }
 
+        public void RegisterStream(Stream stream)
+        {
+            _streams.Add(stream);
+        }
+
+        public void UnregisterStream(Stream stream)
+        {
+            _streams.Remove(stream);
+        }
     }
 }
