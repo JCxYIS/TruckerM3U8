@@ -51,11 +51,12 @@ app.Map("/stream", async (HttpContext context, HttpResponse response) =>
 });
 
 //app.MapControllers();
+if (app.Environment.IsProduction())
+{
+    Process.Start("explorer", "http://localhost:5000");
+}
 
 app.Run();
 
-if(app.Environment.IsProduction())
-{
-    Process.Start("http://localhost:5000");
-}
+
 
