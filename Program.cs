@@ -18,10 +18,10 @@ app.MapGet("/", (HttpResponse response) =>
         // ...
     }
     response.ContentType = "text/html";
-    return "go <a href='/stream'>stream</a>";
+    return "Go to <a href='/stream'>stream</a>";
 });
 
-//app.MapGet("/set", () =>
+//app.MapPost("/set", () =>
 //{
 //    using (var scope = app.Services.CreateScope())
 //    {
@@ -42,10 +42,14 @@ app.Map("/stream", async (HttpContext context, HttpResponse response) =>
         var service = scope.ServiceProvider.GetRequiredService<RestreamService>();
 
         service.RegisterStream(response.Body);              
-        while (!context.RequestAborted.IsCancellationRequested) 
-        {
+
+        // keep sending stream until connection closed
+        while (!context.RequestAborted.IsCancellationRequested)
+        {            
             //for(int i = 0; i < 64; i++) { await response.Body.WriteAsync(Encoding.UTF8.GetBytes("A")); await Task.Delay(100); }
         }
+
+        // cleanup
         service.UnregisterStream(response.Body);
     }
 });

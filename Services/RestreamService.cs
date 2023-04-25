@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Net;
 using System.Net.Sockets;
 
 namespace M3U8LocalStream.Services
@@ -9,6 +10,7 @@ namespace M3U8LocalStream.Services
         private readonly ILogger<RestreamService> _logger;
 
         private readonly List<Stream> _streams = new List<Stream>();
+        public Stream STREAM;
 
 
         public RestreamService(ILogger<RestreamService> logger)
@@ -19,39 +21,43 @@ namespace M3U8LocalStream.Services
             _ffmpegProcess = new Process();
             _ffmpegProcess.StartInfo.FileName = @"ThirdParty/ffmpeg.exe";
             _ffmpegProcess.StartInfo.Arguments =
-                "-i https://stream.pbs.gov.tw/live/mp3:PBS/playlist.m3u8 -listen 1 -c copy -reconnect 1 -reconnect_at_eof 1 -reconnect_on_network_error 1 -f adts udp://127.0.0.1:8763";
+                $"-i https://stream.pbs.gov.tw/live/mp3:PBS/playlist.m3u8 -listen 1 -c copy -reconnect 1 -reconnect_at_eof 1 -reconnect_on_network_error 1 -f adts tcp://127.0.0.1:1049";
             _ffmpegProcess.StartInfo.CreateNoWindow = true; // uncomment to display FFMPEG logs            
-
             _ffmpegProcess.Start();
-            _logger.LogInformation("FFMPEG started");
+            _logger.LogInformation($"FFMPEG started (PID={_ffmpegProcess.Id}) with arg={_ffmpegProcess.StartInfo.Arguments}");
 
-            // Udp stream (in)
-            Task.Run(UdpStreamListener);
+            // FFMPEG In Stream
+            Task.Run(StreamListener);
         }
 
-        private async Task UdpStreamListener()
+        private async Task StreamListener()
         {
-            using (UdpClient udp = new UdpClient(8763))
+            //Tcp
+            using (TcpClient client = new TcpClient("127.0.0.1", 1049))
             {
-                while (true)
+                using(var inStream  = client.GetStream())
                 {
-                    try
+                    byte[] buffer = new byte[128];
+                    while(true)
                     {
-                        var resultChunk = (await udp.ReceiveAsync()).Buffer;
-
-                        for (int i = 0; i < _streams.Count; i++)
+                        try
                         {
-                            //await _streams[i].WriteAsync(resultChunk);
-                            //await _streams[i].FlushAsync();
-                        }
+                            await inStream.ReadAsync(buffer, 0, buffer.Length);
 
-                        _logger.LogDebug($"Read {resultChunk.Length} bytes and Write to {_streams.Count} streams");
+                            for (int i = 0; i < _streams.Count; i++)
+                            {
+                                await _streams[i].WriteAsync(buffer, 0, buffer.Length);
+                                await _streams[i].FlushAsync();
+                            }
+
+                            _logger.LogDebug($"Read {buffer.Length} bytes and Write to {_streams.Count} streams");
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.LogError(e.ToString());
+                        }
+                        //await Task.Delay(100);
                     }
-                    catch(Exception e)
-                    {
-                        _logger.LogError(e.ToString());
-                    }
-                    //await Task.Delay(100);
                 }
             }
         }
