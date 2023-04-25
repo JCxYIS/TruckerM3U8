@@ -1,9 +1,5 @@
 using M3U8LocalStream.Services;
-using Microsoft.AspNetCore.Mvc;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Sockets;
-using System.Text;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<RestreamService>();
@@ -45,8 +41,8 @@ app.Map("/stream", async (HttpContext context, HttpResponse response) =>
 
         // keep sending stream until connection closed
         while (!context.RequestAborted.IsCancellationRequested)
-        {            
-            //for(int i = 0; i < 64; i++) { await response.Body.WriteAsync(Encoding.UTF8.GetBytes("A")); await Task.Delay(100); }
+        {
+            await Task.Delay(100);
         }
 
         // cleanup
@@ -55,4 +51,11 @@ app.Map("/stream", async (HttpContext context, HttpResponse response) =>
 });
 
 //app.MapControllers();
+
 app.Run();
+
+if(app.Environment.IsProduction())
+{
+    Process.Start("http://localhost:5000");
+}
+
