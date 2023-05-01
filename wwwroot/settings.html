@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TruckerM3U8 Settings</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            border-spacing: 0px;
+        }
+
+        table, th, td {
+            padding: 7px;
+            border: 1px solid gray;
+        }       
+    </style>
+</head>
+<body>
+    <h1>TruckerM3U8</h1>
+    <i>Convert (not only) m3u8 stream to mp3 that ETS2/ATS can recognize.</i>  
+    <p>Dest URL: <a id="destUrl" href="http://127.0.0.1:5000/">http://127.0.0.1:5000/</a> </p>
+
+    <div>
+        <h2>Add to List</h2>
+        
+        <label for="inputUrl">Add your stream URL: </label>
+        <input name="inputUrl" id="inputUrl" />
+        <button onclick="sendPlayRequest()">Play</button>        
+        
+        
+    </div>
+
+    <div>
+        <h2>Radio List</h2>
+        
+        <table style="border: 1px solid">
+            <tr>
+                <th>Action</th>
+                <th>Name</th>
+                <th>URL</th>
+            </tr>
+            <tr>
+                <td><button onclick="">Add New</button></td>
+                <td><input /></td>
+                <td><input /></td>
+            </tr>
+            <tr>
+                <td><button onclick="sendPlayRequest('https://stream.pbs.gov.tw/live/mp3:PBS/playlist.m3u8')">Play</button> <button>Delete</button></td>
+                <td>警察廣播電臺</td>
+                <td>https://stream.pbs.gov.tw/live/mp3:PBS/playlist.m3u8</td>
+            </tr>
+            <tr>
+                <td><button onclick="sendPlayRequest('https://streamak0138.akamaized.net/live0138lh-mbm9/_definst_/rti3/playlist.m3u8')">Play</button> <button>Delete</button></td>
+                <td>中央廣播電臺</td>
+                <td>https://streamak0138.akamaized.net/live0138lh-mbm9/_definst_/rti3/playlist.m3u8</td>
+            </tr>
+
+        </table>
+    </div>
+
+    
+    <script>
+        const fetchCurrentPlaying = async () => {
+            // fetch current playing
+            let req = await fetch('/getSourceUrl');
+            let currentPlayingUrl = await req.text();
+            document.getElementById("inputUrl").value = currentPlayingUrl;
+
+            // local path
+            let destUrl = document.getElementById("destUrl");
+            destUrl.innerHTML = window.location.protocol + "//" + window.location.host;
+            destUrl.href = destUrl.innerHTML;
+        }
+        
+        const sendPlayRequest = (url = '') => {
+            // 
+            if (!url) {
+                console.error('haha');
+                return;
+            }
+
+            fetch('/setSourceUrl', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: `"${url}"`
+            })
+                .then(resp => {
+                    console.log(resp);
+                    fetchCurrentPlaying();
+                })
+                .catch(error => console.error(error))
+        }
+
+        const setFav = () => {
+            
+        }
+
+        fetchCurrentPlaying();
+    </script>
+</body>
+
+</html>

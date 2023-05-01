@@ -1,4 +1,5 @@
 using M3U8LocalStream.Services;
+using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,27 +7,19 @@ builder.Services.AddSingleton<RestreamService>();
 
 var app = builder.Build();
 
-app.MapGet("/", (HttpResponse response) =>
-{
-    using (var scope = app.Services.CreateScope())
-    {
-        var service = scope.ServiceProvider.GetRequiredService<RestreamService>();
-        // ...
-    }
-    response.ContentType = "text/html";
-    return "Go to <a href='/stream'>stream</a>";
-});
 
-//app.MapPost("/set", () =>
+//app.MapGet("/", (HttpResponse response) =>
 //{
 //    using (var scope = app.Services.CreateScope())
 //    {
-//        var service = scope.ServiceProvider.GetRequiredService<RestreamService>();
+//        var restreamService = scope.ServiceProvider.GetRequiredService<RestreamService>();
 //        // ...
 //    }
+//    response.ContentType = "text/html";
+//    return "Go to <a href='/stream'>stream</a>";
 //});
 
-app.Map("/stream", async (HttpContext context, HttpResponse response) =>
+app.Map("/", async (HttpContext context, HttpResponse response) =>
 {
     response.ContentType = "audio/mp3";
 
@@ -35,9 +28,9 @@ app.Map("/stream", async (HttpContext context, HttpResponse response) =>
 
     using (var scope = app.Services.CreateScope())
     {
-        var service = scope.ServiceProvider.GetRequiredService<RestreamService>();
+        var restreamService = scope.ServiceProvider.GetRequiredService<RestreamService>();
 
-        service.RegisterStream(response.Body);              
+        restreamService.RegisterStream(response.Body);
 
         // keep sending stream until connection closed
         while (!context.RequestAborted.IsCancellationRequested)
@@ -46,14 +39,39 @@ app.Map("/stream", async (HttpContext context, HttpResponse response) =>
         }
 
         // cleanup
-        service.UnregisterStream(response.Body);
+        restreamService.UnregisterStream(response.Body);
     }
 });
 
+app.MapGet("/getSourceUrl", () =>
+{    
+    using (var scope = app.Services.CreateScope())
+    {
+        var restreamService = scope.ServiceProvider.GetRequiredService<RestreamService>();
+        return restreamService.SourceUrl;
+    }
+});
+
+app.MapPost("/setSourceUrl", ([FromBody] string url) =>
+{        
+    using (var scope = app.Services.CreateScope())
+    {
+        var restreamService = scope.ServiceProvider.GetRequiredService<RestreamService>();
+        restreamService.SetSourceUrl(url);
+    }
+});
+
+
+
 //app.MapControllers();
+
+// Serve Static files
+app.UseStaticFiles();
+
+// 啟動時開啟瀏覽器
 if (app.Environment.IsProduction())
 {
-    Process.Start("explorer", "http://localhost:5000");
+    Process.Start("explorer", "http://localhost:5000/settings.html");
 }
 
 app.Run();
