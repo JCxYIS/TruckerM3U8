@@ -20,7 +20,7 @@ namespace M3U8LocalStream.Services
             _ffmpegProcess = new Process();
             _ffmpegProcess.StartInfo.FileName = @"ThirdParty/ffmpeg.exe";
             _ffmpegProcess.StartInfo.Arguments =
-                $"-re -i https://stream.pbs.gov.tw/live/mp3:PBS/playlist.m3u8 -listen 1 -c copy -reconnect 1 -reconnect_at_eof 1 -reconnect_on_network_error 1 -f adts tcp://127.0.0.1:1049";
+                $"-re -i https://stream.pbs.gov.tw/live/mp3:PBS/playlist.m3u8 -listen 1 -c libmp3lame -reconnect 1 -reconnect_at_eof 1 -reconnect_on_network_error 1 -f mp3 tcp://127.0.0.1:1049";
             //_ffmpegProcess.StartInfo.CreateNoWindow = true; // uncomment to display FFMPEG logs            
             _ffmpegProcess.Start();
             _logger.LogInformation($"FFMPEG started (PID={_ffmpegProcess.Id})");

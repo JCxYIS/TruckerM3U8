@@ -28,7 +28,7 @@ app.MapGet("/", (HttpResponse response) =>
 
 app.Map("/stream", async (HttpContext context, HttpResponse response) =>
 {
-    response.ContentType = "audio/aac";
+    response.ContentType = "audio/mp3";
 
     //response.Headers.Connection = "close";
     response.Headers.CacheControl = "no-cache";
