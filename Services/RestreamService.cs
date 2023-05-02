@@ -10,7 +10,7 @@ namespace M3U8LocalStream.Services
         private Process? _ffmpegProcess = null;
         private CancellationTokenSource _listenerCancelTokenSource = new CancellationTokenSource();
         private readonly List<Stream> _streams = new List<Stream>();
-        private string _sourceUrl = "https://stream.pbs.gov.tw/live/mp3:PBS/playlist.m3u8";
+        private string _sourceUrl = "";
 
         /// <summary>
         /// How many audiences?
@@ -25,11 +25,22 @@ namespace M3U8LocalStream.Services
 
         public RestreamService(ILogger<RestreamService> logger)
         {
-            _logger = logger;
-
-            StartFfmpeg();                        
+            _logger = logger;            
         }
 
+        /// <summary>
+        /// Set Source Url
+        /// </summary>
+        /// <param name="url"></param>
+        public void SetSourceUrl(string url)
+        {
+            _sourceUrl = url;
+            StartFfmpeg();
+        }
+
+        /// <summary>
+        /// Start the main service
+        /// </summary>
         private void StartFfmpeg()
         {
             // Clean up lat session
@@ -110,14 +121,6 @@ namespace M3U8LocalStream.Services
             _streams.Remove(stream);
         }
 
-        /// <summary>
-        /// Set Source Url
-        /// </summary>
-        /// <param name="url"></param>
-        public void SetSourceUrl(string url)
-        {
-            _sourceUrl = url;
-            StartFfmpeg();
-        }
+        
     }
 }

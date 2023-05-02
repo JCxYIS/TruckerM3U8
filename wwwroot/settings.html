@@ -30,11 +30,11 @@
                 <th>Name</th>
                 <th>URL</th>
             </tr>
-            <tr>
+            <!--<tr>
                 <td><button onclick="addNewRadio()">Add New &amp; Play</button></td>
                 <td><input id="addName" /></td>
                 <td><input id="addUrl" /></td>
-            </tr>
+            </tr>-->
             <tbody id="radioList">
             </tbody>
         </table>
@@ -42,21 +42,19 @@
 
     
     <script>
-        var radioList = [
-            { name: "警察廣播電臺", url: "https://stream.pbs.gov.tw/live/mp3:PBS/playlist.m3u8" },
-            { name: "中央廣播電臺", url: "https://streamak0138.akamaized.net/live0138lh-mbm9/_definst_/rti3/playlist.m3u8"},
-        ]
+        var radioList = []
         var currentRadioUrl = "";
 
         const fetchRadioList = async () => {
-            // TODO
+            let req = await fetch("/radio.json");
+            radioList = await req.json();
+            updateUi();
         }
         
         const fetchCurrentPlaying = async () => {
             // fetch current playing
             let req = await fetch('/sourceUrl');
-            currentRadioUrl = await req.text();
-            
+            currentRadioUrl = await req.text();            
             updateUi();
         }
         

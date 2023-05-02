@@ -1,0 +1,10 @@
+[
+  {
+    "name": "警察廣播電臺",
+    "url": "https://stream.pbs.gov.tw/live/mp3:PBS/playlist.m3u8"
+  },
+  {
+    "name": "中央廣播電臺",
+    "url": "https://streamak0138.akamaized.net/live0138lh-mbm9/_definst_/rti3/playlist.m3u8"
+  }
+]

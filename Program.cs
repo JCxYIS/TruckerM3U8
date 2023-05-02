@@ -3,21 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddSingleton<RestreamService>();
 
 var app = builder.Build();
 
-
-//app.MapGet("/", (HttpResponse response) =>
-//{
-//    using (var scope = app.Services.CreateScope())
-//    {
-//        var restreamService = scope.ServiceProvider.GetRequiredService<RestreamService>();
-//        // ...
-//    }
-//    response.ContentType = "text/html";
-//    return "Go to <a href='/stream'>stream</a>";
-//});
 
 app.Map("/", async (HttpContext context, HttpResponse response) =>
 {
@@ -59,21 +49,6 @@ app.MapPost("/sourceUrl", ([FromBody] string url) =>
         var restreamService = scope.ServiceProvider.GetRequiredService<RestreamService>();
         restreamService.SetSourceUrl(url);
     }
-});
-
-app.MapGet("/radioList", () =>
-{
-    // TODO
-});
-
-app.MapPost("/radioList", () =>
-{
-    // TODO
-});
-
-app.MapDelete("/radioList", () =>
-{
-    // TODO
 });
 
 
