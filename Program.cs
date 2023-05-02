@@ -43,7 +43,7 @@ app.Map("/", async (HttpContext context, HttpResponse response) =>
     }
 });
 
-app.MapGet("/getSourceUrl", () =>
+app.MapGet("/sourceUrl", () =>
 {    
     using (var scope = app.Services.CreateScope())
     {
@@ -52,7 +52,7 @@ app.MapGet("/getSourceUrl", () =>
     }
 });
 
-app.MapPost("/setSourceUrl", ([FromBody] string url) =>
+app.MapPost("/sourceUrl", ([FromBody] string url) =>
 {        
     using (var scope = app.Services.CreateScope())
     {
@@ -61,6 +61,20 @@ app.MapPost("/setSourceUrl", ([FromBody] string url) =>
     }
 });
 
+app.MapGet("/radioList", () =>
+{
+    // TODO
+});
+
+app.MapPost("/radioList", () =>
+{
+    // TODO
+});
+
+app.MapDelete("/radioList", () =>
+{
+    // TODO
+});
 
 
 //app.MapControllers();

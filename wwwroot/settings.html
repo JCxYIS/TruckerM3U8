@@ -20,15 +20,6 @@
     <i>Convert (not only) m3u8 stream to mp3 that ETS2/ATS can recognize.</i>  
     <p>Dest URL: <a id="destUrl" href="http://127.0.0.1:5000/">http://127.0.0.1:5000/</a> </p>
 
-    <div>
-        <h2>Add to List</h2>
-        
-        <label for="inputUrl">Add your stream URL: </label>
-        <input name="inputUrl" id="inputUrl" />
-        <button onclick="sendPlayRequest()">Play</button>        
-        
-        
-    </div>
 
     <div>
         <h2>Radio List</h2>
@@ -40,36 +31,33 @@
                 <th>URL</th>
             </tr>
             <tr>
-                <td><button onclick="">Add New</button></td>
-                <td><input /></td>
-                <td><input /></td>
+                <td><button onclick="addNewRadio()">Add New &amp; Play</button></td>
+                <td><input id="addName" /></td>
+                <td><input id="addUrl" /></td>
             </tr>
-            <tr>
-                <td><button onclick="sendPlayRequest('https://stream.pbs.gov.tw/live/mp3:PBS/playlist.m3u8')">Play</button> <button>Delete</button></td>
-                <td>警察廣播電臺</td>
-                <td>https://stream.pbs.gov.tw/live/mp3:PBS/playlist.m3u8</td>
-            </tr>
-            <tr>
-                <td><button onclick="sendPlayRequest('https://streamak0138.akamaized.net/live0138lh-mbm9/_definst_/rti3/playlist.m3u8')">Play</button> <button>Delete</button></td>
-                <td>中央廣播電臺</td>
-                <td>https://streamak0138.akamaized.net/live0138lh-mbm9/_definst_/rti3/playlist.m3u8</td>
-            </tr>
-
+            <tbody id="radioList">
+            </tbody>
         </table>
     </div>
 
     
     <script>
+        var radioList = [
+            { name: "警察廣播電臺", url: "https://stream.pbs.gov.tw/live/mp3:PBS/playlist.m3u8" },
+            { name: "中央廣播電臺", url: "https://streamak0138.akamaized.net/live0138lh-mbm9/_definst_/rti3/playlist.m3u8"},
+        ]
+        var currentRadioUrl = "";
+
+        const fetchRadioList = async () => {
+            // TODO
+        }
+        
         const fetchCurrentPlaying = async () => {
             // fetch current playing
-            let req = await fetch('/getSourceUrl');
-            let currentPlayingUrl = await req.text();
-            document.getElementById("inputUrl").value = currentPlayingUrl;
-
-            // local path
-            let destUrl = document.getElementById("destUrl");
-            destUrl.innerHTML = window.location.protocol + "//" + window.location.host;
-            destUrl.href = destUrl.innerHTML;
+            let req = await fetch('/sourceUrl');
+            currentRadioUrl = await req.text();
+            
+            updateUi();
         }
         
         const sendPlayRequest = (url = '') => {
@@ -79,7 +67,7 @@
                 return;
             }
 
-            fetch('/setSourceUrl', {
+            fetch('/sourceUrl', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -93,11 +81,41 @@
                 .catch(error => console.error(error))
         }
 
-        const setFav = () => {
-            
+        const addNewRadio = () => {
+            // TODO
+            let name = document.getElementById("addName").value;
+            let url = document.getElementById("addUrl").value;
+            console.error("NOT IMPLEMENTED...", name, url)
         }
 
+        const updateUi = () => {
+            // Local Url
+            let destUrl = document.getElementById("destUrl");
+            destUrl.innerHTML = window.location.protocol + "//" + window.location.host;
+            destUrl.href = destUrl.innerHTML;
+            
+            // Radio List
+            let table = document.getElementById("radioList");
+            table.innerHTML = "";  // clear all old element
+            for (let i = 0; i < radioList.length; i++) {
+                let row = table.insertRow();
+                let cell = row.insertCell();
+                if (radioList[i].url == currentRadioUrl) {
+                    cell.innerHTML = `<button disabled onclick="sendPlayRequest('${radioList[i].url}')">Playing</button>`
+                } else {
+                    cell.innerHTML = `<button onclick="sendPlayRequest('${radioList[i].url}')">Play</button>`
+                }
+                cell.innerHTML += `<button>Delete</button>`;
+                cell = row.insertCell();
+                cell.innerHTML = radioList[i].name;
+                cell = row.insertCell();
+                cell.innerHTML = radioList[i].url;
+            }
+        }
+
+        fetchRadioList();
         fetchCurrentPlaying();
+        updateUi();
     </script>
 </body>
 
