@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32516.85
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "M3U8LocalStream", "M3U8LocalStream.csproj", "{3008F6E0-30CF-4C3F-917D-2A677D7FE944}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TruckerM3U8", "TruckerM3U8.csproj", "{3008F6E0-30CF-4C3F-917D-2A677D7FE944}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

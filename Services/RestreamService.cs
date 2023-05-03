@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace M3U8LocalStream.Services
+namespace TruckerM3U8.Services
 {
     public class RestreamService
     {
@@ -25,7 +25,7 @@ namespace M3U8LocalStream.Services
 
         public RestreamService(ILogger<RestreamService> logger)
         {
-            _logger = logger;            
+            _logger = logger;
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace M3U8LocalStream.Services
         private void StartFfmpeg()
         {
             // Clean up lat session
-            if(_ffmpegProcess != null)
+            if (_ffmpegProcess != null)
             {
                 _listenerCancelTokenSource.Cancel();
                 _listenerCancelTokenSource = new CancellationTokenSource();
@@ -63,7 +63,7 @@ namespace M3U8LocalStream.Services
             _logger.LogInformation($"FFMPEG started (PID={_ffmpegProcess.Id})");
 
             // Listener
-            Task.Run(()=>StreamListener(_listenerCancelTokenSource.Token));
+            Task.Run(() => StreamListener(_listenerCancelTokenSource.Token));
         }
 
         /// <summary>
@@ -75,10 +75,10 @@ namespace M3U8LocalStream.Services
             //Tcp
             using (TcpClient client = new TcpClient("127.0.0.1", 1049))
             {
-                using(var inStream  = client.GetStream())
+                using (var inStream = client.GetStream())
                 {
                     byte[] buffer = new byte[512];
-                    while(!token.IsCancellationRequested)
+                    while (!token.IsCancellationRequested)
                     {
                         try
                         {
@@ -121,6 +121,6 @@ namespace M3U8LocalStream.Services
             _streams.Remove(stream);
         }
 
-        
+
     }
 }

@@ -1,6 +1,6 @@
-using M3U8LocalStream.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using TruckerM3U8.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,10 +60,14 @@ app.UseStaticFiles();
 // 啟動時開啟瀏覽器
 if (app.Environment.IsProduction())
 {
-    Process.Start("explorer", "http://localhost:5000/settings.html");
+    Process.Start("explorer", "http://localhost:3378/settings.html");
+    app.Run("http://localhost:3378");
+}
+else
+{
+    app.Run();
 }
 
-app.Run();
 
 
 
