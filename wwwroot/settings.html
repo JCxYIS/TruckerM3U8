@@ -18,7 +18,7 @@
 <body>
     <h1>TruckerM3U8</h1>
     <i>Convert (not only) m3u8 stream to mp3 that ETS2/ATS can recognize.</i>  
-    <p>Dest URL: <a id="destUrl" href="http://127.0.0.1:5000/">http://127.0.0.1:5000/</a> </p>
+    <p>Dest URL: <a class="destUrl" href="http://127.0.0.1:5000/">http://127.0.0.1:5000/</a> </p>
 
 
     <div>
@@ -38,6 +38,24 @@
             <tbody id="radioList">
             </tbody>
         </table>
+
+        <p>You can add more radio in <code>wwwroot/radio.json</code></p>
+
+    </div>
+
+    <div>
+        <h2>How to add TruckerM3U8 into ETS2</h2>
+        <ul>
+            <li>Open My Documents\Euro Truck Simulator 2\live_streams.sii in Notepad</li>
+            <li>Scroll to the bottom of the list and add in new stations in the same format as the ones above (You might need to change the index)</li>
+            <ul>
+                <li style="font-family: monospace">stream_data[274]: "<span class="destUrl"></span>|&lt;color value=FFBBC539&gt;TruckerM3U8|You Choose|XX|128|0"</li>
+            </ul>
+            <li>Scroll to the top, change "stream_data" to total radio count</li>     
+            <ul>
+                <li style="font-family: monospace">stream_data: 275</li>
+            </ul>
+        </ul>
     </div>
     
     <script>
@@ -78,18 +96,14 @@
                 .catch(error => console.error(error))
         }
 
-        const addNewRadio = () => {
-            // TODO
-            let name = document.getElementById("addName").value;
-            let url = document.getElementById("addUrl").value;
-            console.error("NOT IMPLEMENTED...", name, url)
-        }
-
         const updateUi = () => {
             // Local Url
-            let destUrl = document.getElementById("destUrl");
-            destUrl.innerHTML = window.location.protocol + "//" + window.location.host;
-            destUrl.href = destUrl.innerHTML;
+            let destUrls = document.getElementsByClassName("destUrl");
+            let rootUrl = window.location.protocol + "//" + window.location.host;
+            for (let i = 0; i < destUrls.length; i++) {
+                destUrls[i].innerHTML = rootUrl;
+                destUrls[i].href = rootUrl;
+            }
             
             // Radio List
             let table = document.getElementById("radioList");
