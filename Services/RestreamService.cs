@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System;
 
 namespace TruckerM3U8.Services
 {
@@ -57,7 +58,7 @@ namespace TruckerM3U8.Services
             _ffmpegProcess = new Process();
             _ffmpegProcess.StartInfo.FileName = @"ThirdParty/ffmpeg.exe";
             _ffmpegProcess.StartInfo.Arguments =
-                $"-re -i {SourceUrl} -listen 1 -c libmp3lame -reconnect 1 -reconnect_at_eof 1 -reconnect_on_network_error 1 -f mp3 tcp://127.0.0.1:1049";
+                $"-re -i {SourceUrl} -listen 1 -c libmp3lame -reconnect 1 -reconnect_at_eof 1 -reconnect_streamed 1 -reconnect_delay_max 4 -f mp3 tcp://127.0.0.1:1049";
             //_ffmpegProcess.StartInfo.CreateNoWindow = true; // uncomment to display FFMPEG logs            
             _ffmpegProcess.Start();
             _logger.LogInformation($"FFMPEG started (PID={_ffmpegProcess.Id})");
@@ -78,25 +79,52 @@ namespace TruckerM3U8.Services
                 using (var inStream = client.GetStream())
                 {
                     byte[] buffer = new byte[512];
+                    int length = 0;
+                    int retryCount = 0;
                     while (!token.IsCancellationRequested)
                     {
+                        // Read from ff
+                        length = 0;
                         try
                         {
-                            int length = await inStream.ReadAsync(buffer, 0, buffer.Length);
+                            length = await inStream.ReadAsync(buffer, token);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.LogError($"StreamListener READ error: {e}");
+                            StartFfmpeg();
+                            break;
+                        }
 
-                            for (int i = 0; i < _streams.Count; i++)
+                        // Read nothing, might be an error
+                        if (length == 0)
+                        {
+                            retryCount++;
+                            _logger.LogWarning("StreamListener READ nothing, retry {0}", retryCount);
+                            if(retryCount >= 5)
+                            {
+                                _logger.LogError("StreamListener READ nothing, retry {0} times, restart stream", retryCount);
+                                StartFfmpeg();
+                                return;
+                            }
+                            await Task.Delay(500);
+                            continue;
+                        }
+                        
+                        // Write to all output streams
+                        for (int i = 0; i < _streams.Count; i++)
+                        {
+                            try
                             {
                                 await _streams[i].WriteAsync(buffer, 0, length);
                                 //await _streams[i].FlushAsync();
                             }
-
-                            _logger.LogTrace($"Copy {length} bytes to {_streams.Count} streams");
+                            catch (Exception e)
+                            {
+                                _logger.LogWarning($"StreamListener WRITE error: {e}");
+                            }
                         }
-                        catch (Exception e)
-                        {
-                            _logger.LogError(e.ToString());
-                        }
-                        //await Task.Delay(100);
+                        _logger.LogTrace($"Copy {length} bytes to {_streams.Count} streams");
                     }
                     _logger.LogInformation("StreamListener stopped");
                 }
