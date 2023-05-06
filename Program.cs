@@ -55,7 +55,14 @@ app.MapPost("/sourceUrl", ([FromBody] string url) =>
 //app.MapControllers();
 
 // Serve Static files
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers.Append(
+             "Cache-Control", $"no-cache");
+    }
+});
 
 // 啟動時開啟瀏覽器
 if (app.Environment.IsProduction())
