@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 using System.Diagnostics;
 using TruckerM3U8.Services;
 
@@ -59,9 +60,8 @@ app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = ctx =>
     {
-        ctx.Context.Response.Headers.Append(
-             "Cache-Control", $"no-cache");
-    }
+        ctx.Context.Response.Headers[HeaderNames.CacheControl] = "no-store";
+    },   
 });
 
 // 啟動時開啟瀏覽器

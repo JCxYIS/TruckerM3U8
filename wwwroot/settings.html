@@ -17,13 +17,13 @@
 </head>
 <body>
     <h1>TruckerM3U8</h1>
-    <i>Convert (not only) m3u8 stream to mp3 that ETS2/ATS can recognize.</i>  
+    <i>Convert (not only) m3u8 stream to mp3 that ETS2/ATS can recognize.</i>
     <p>Dest URL: <a class="destUrl" href="http://127.0.0.1:5000/">http://127.0.0.1:5000/</a> </p>
 
 
     <div>
         <h2>Radio List</h2>
-        
+
         <table style="border: 1px solid">
             <tr>
                 <th>Action</th>
@@ -51,22 +51,29 @@
             <ul>
                 <li style="font-family: monospace">stream_data[274]: "<span class="destUrl"></span>|&lt;color value=FFBBC539&gt;TruckerM3U8|You Choose|TW|128|0"</li>
             </ul>
-            <li>Scroll to the top, change "stream_data" to total radio count</li>     
+            <li>Scroll to the top, change "stream_data" to total radio count</li>
             <ul>
                 <li style="font-family: monospace">stream_data: 275</li>
             </ul>
         </ul>
     </div>
-    
-    
+
+    <div>
+        <h2>Doesn't work?</h2>
+        <ul>
+            <li>Try download newer FFMPEG version from <a href="https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z">here</a>. Simply replace <code>ThirdParty/ffmpeg.exe</code>.</li>
+        </ul>
+    </div>
+
+
     <div style="padding-top: 16px">
-        <i>v.1.1</i>
-        <br />        
+        <i>v.1.2</i>
+        <br />
         <a href="https://github.com/JCxYIS/TruckerM3U8/releases/latest">
             <img src="https://img.shields.io/github/v/release/JCxYIS/TruckerM3U8?label=Latest%20version&style=flat-square" />
         </a>
     </div>
-    
+
     <script>
         var radioList = []
         var currentRadioUrl = "";
@@ -76,16 +83,16 @@
             radioList = await req.json();
             updateUi();
         }
-        
+
         const fetchCurrentPlaying = async () => {
             // fetch current playing
             let req = await fetch('/sourceUrl');
-            currentRadioUrl = await req.text();            
+            currentRadioUrl = await req.text();
             updateUi();
         }
-        
+
         const sendPlayRequest = (url = '') => {
-            // 
+            //
             if (!url) {
                 console.error('haha');
                 return;
@@ -113,7 +120,7 @@
                 destUrls[i].innerHTML = rootUrl;
                 destUrls[i].href = rootUrl;
             }
-            
+
             // Radio List
             let table = document.getElementById("radioList");
             table.innerHTML = "";  // clear all old element
